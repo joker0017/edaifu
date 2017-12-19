@@ -1,0 +1,145 @@
+	<script type="text/javascript" src="/js/tab.js"></script>
+	<form id="adminManage_add_form" method="post">
+		<table  style="width:100%;font-size: 16px;padding-top: 30px;">
+			<tr>
+				<td style="width:15%"></td>
+				<td>登陆账号:</td>
+				<td>
+					<input class="easyui-textbox" data-options="required:true" id="adminManage_add_account_id" name="account_id" style="width:500px;height:30px">
+				</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>密码:</td>
+				<td><input class="easyui-textbox" data-options="required:true" id="adminManage_add_password" name="password" style="width:500px;height:30px"></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>姓名:</td>
+				<td><input class="easyui-textbox" id="adminManage_add_name" data-options="required:true" name="name" style="width:500px;height:30px" /></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>电话号码:</td>
+				<td><input class="easyui-textbox" data-options="required:true" id="adminManage_add_phone" name="phone" style="width:500px;height:30px" /></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>EMail:</td>
+				<td><input class="easyui-textbox" id="adminManage_add_email" name="email" style="width:500px;height:30px" /></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>角色选择:</td>
+				<td>
+					<table id="multiple_select">
+						<tr>
+							<td>可选角色</td>
+							<td>&nbsp;</td>
+							<td>已选角色</td>
+						</tr>
+						<tr>
+							<td>
+								<select id="unselected" name="unselected" style="width:150px; height:220px;" multiple="multiple">
+								</select>
+							</td>
+							<td>
+								<p><input id="b1" type="button" class="s1" value="--&gt;" /></p>
+								<p><input type="button" id="b2" class="s1" value="--&gt;&gt;" /></p>
+								<p><input type="button" id="b3" class="s1" value="&lt;--" /></p>
+								<p><input type="button" id="b4" class="s1" value="&lt;&lt;--" /></p>
+							</td>
+							<td><select id="selected" name="selected" style="width:150px;height:220px;" multiple="multiple"></select></td>
+						</tr>
+					</table>
+				</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>机构选择:</td>
+				<td style="align:left">
+					<select id="adminManage_add_orgid" name="orgid" class="easyui-combotree" style="width:500px;" 
+							data-options="url:'/org/orgList',required:true,
+
+										  	loadFilter: function(result){
+										  		console.log(result.data);
+										      	return result.data;
+										 	}">
+					</select>
+				</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>联系地址:</td>
+				<td><input class="easyui-textbox" id="adminManage_add_address" name="address" style="width:500px;height:30px" /></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>职位:</td>
+				<td><input class="easyui-textbox" id="adminManage_add_position" name="position" style="width:500px;height:30px" /></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>性别:</td>
+				<td>
+					<select class="easyui-combobox" id="adminManage_add_sex" name="sex" data-options="required:true,editable:false,panelHeight:'auto'" style="width:100px;">
+						<option value="1">男</option>
+						<option value="0">女</option>
+					</select>
+				</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>办公电话:</td>
+				<td><input class="easyui-textbox" id="adminManage_add_tel" name="tel" style="width:500px;height:30px" /></td>
+				<td></td>
+			</tr>
+		</table>
+	</form>
+<script>
+		$(function(){
+			//初始化角色选择框
+			getroles();
+		});
+		
+		/**
+		 *获取系统角色列表
+		 */
+		function getroles() {
+			$("#s1").empty();
+			$.ajax({
+				type : "POST",
+				url : "/role/roleList",
+				data : JSON.stringify({}),
+				contentType : "application/json; charset=utf-8",
+				timeout : 20000,
+				dataType : "json",
+				error : function(msg) {
+					if (msg.responseJSON != undefined) {
+						var status = msg.responseJSON.tips.message;
+						if (status == "该交易需要先登录") {
+							window.location.href = "../mng/adminlogin";
+						} else {
+							alert(JSON.stringify(msg));
+						}
+					}
+				},
+				success : function(msg) {
+					var res = msg.data;
+					$.each(res, function(n, value) {
+						$("<option value='"+value.roleId+"'>" + value.roleName + "</option>").appendTo("#unselected");
+					});
+				}
+			});
+		}
+	</script>

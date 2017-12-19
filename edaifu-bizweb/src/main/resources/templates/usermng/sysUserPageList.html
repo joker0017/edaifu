@@ -1,0 +1,393 @@
+<script>
+    $(function () {
+        initGrid();
+    });
+
+    //初始化数据
+    function initGrid() {
+        $('#adminManage_grid').datagrid({
+            title: '查询列表',
+            iconCls: 'icon-edit',//图标
+            method: "POST",
+            nowrap: false,
+            height: 750,
+            fitColumns: true,//宽度自适应
+            striped: true,
+            border: true,
+            collapsible: true,//是否可折叠的
+            pageList: [5, 10, 15, 20],//可设置每页行数
+            url: '/account/accountPageList',
+            //sortName: 'code',
+            //sortOrder: 'desc',
+            remoteSort: false,
+            idField: 'account_id',
+            singleSelect: true,//是否单选
+            pagination: true,//分页控件
+            pagePosition: 'bottom',
+            rownumbers: true,//行号
+            columns: [[{
+                field: '',
+                checkbox: true,
+                width: 80,
+            }, {
+                field: 'name',
+                title: '用户姓名',
+                width: 80
+            }, {
+                field: 'accountId',
+                title: '登录账号',
+                width: 80
+            }, {
+                field: 'phone',
+                title: '电话号码',
+                width: 120
+            }, {
+                field: 'orgName',
+                title: '所属机构',
+                width: 170
+            }, {
+                field: 'status',
+                title: '用户状态',
+                width: 170,
+                formatter: function (value, row, index) {
+                    switch (value) {
+                        case 0:
+                            return "已停用";
+                        default:
+                            return "正常用户"
+                    }
+                }
+            }, {
+                field: 'rolesNames',
+                title: '岗位',
+                width: 175
+            }/* , {
+				field : 'trunks',
+				title : '扣量率(%)',
+				width : 175
+			} */]],
+            toolbar: [{
+                text: '添加',
+                iconCls: 'icon-add',
+                handler: sysAccountManageAdd
+            }, '-', {
+
+                text: '修改',
+                iconCls: 'icon-edit',
+                handler: adminManage_edit_opendialog
+            }, '-', {
+                text: '删除',
+                iconCls: 'icon-remove',
+                handler: adminManage_del
+            }],
+        });
+    }
+
+    /**
+     *删除用户
+     */
+    function adminManage_del() {
+        var selectedRow = $('#adminManage_grid').datagrid("getSelected");
+        if (selectedRow == null) {
+            $.messager.show({
+                title: '信息',
+                msg: '请选择一行数据！',
+                timeout: 4000,
+                showType: 'slide'
+            });
+            return false;
+        }
+        $.messager.confirm('警告', '确定删除该用户?', function (r) {
+            if (r) {
+                var param = {account_id: selectedRow.account_id};
+                $.ajax({
+                    type: "POST",
+                    url: "${pageContext.request.contextPath}/txCtrl?txcode=adminManageDel",
+                    data: JSON.stringify(param),
+                    contentType: "application/json; charset=utf-8",
+                    timeout: 20000,
+                    dataType: "json",
+                    error: function (msg) {
+                        $.messager.show({
+                            title: '信息',
+                            msg: '新增用户失败,该请求需要先登录!',
+                            timeout: 4000,
+                            showType: 'slide'
+                        });
+                    },
+                    success: function (result) {
+                        if (result.data.res == "1") {
+                            $.messager.show({
+                                title: '信息',
+                                msg: '删除用户成功.',
+                                timeout: 4000,
+                                showType: 'slide'
+                            });
+                            $('#adminManage_grid').datagrid('reload');
+                        } else {
+                            $.messager.show({
+                                title: '错误',
+                                msg: '新增用户失败!',
+                                timeout: 4000,
+                                showType: 'slide'
+                            });
+                        }
+
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     *打开新增用户页面窗口
+     */
+    function sysAccountManageAdd() {
+        $("<div></div>").dialog({
+            id : "sysAccountManage_add",
+            title: "新增用户",
+            width: 800,
+            height: 820,
+            closed: false,
+            cache: false,
+            href: "/pages/usermng/sysUserAdd.html",
+            modal: true,
+            onClose : function() {
+                $(this).dialog('destroy');
+            },
+            buttons: [{
+                text: '保存',
+                width: '50px',
+                handler: adminManage_save
+            }, {
+                text : '取消',
+                width: '50px',
+                handler : function() {
+                    $("#sysAccountManage_add").dialog('destroy');
+                }
+            }]
+        });
+    }
+
+    /**
+     *新增用户保存
+     */
+    function adminManage_save() {
+        if (!$("#adminManage_add_form").form("validate")) {
+            return false;
+        }
+        var options = $("#selected option");
+        var roleids = new Array();
+        options.each(function (i, o) {
+            roleids.push($(o).attr("value"));
+        });
+        var param = {
+            "account_id": $("#adminManage_add_account_id").val(),
+            "name": $("#adminManage_add_name").val(),
+            "orgid": $("#adminManage_add_orgid").combotree('getValue'),
+            "password": $("#adminManage_add_password").val(),
+            "phone": $("#adminManage_add_phone").val(),
+            "tel": $("#adminManage_add_tel").val(),
+            "position": $("#adminManage_add_position").val(),
+            "address": $("#adminManage_add_address").val(),
+            "sex": $("#adminManage_add_sex").combobox("getValue"),
+            "email": $("#adminManage_add_email").val(),
+            "roleids": roleids,
+            "trunks": $("#adminManage_add_trunks").val(),
+            "logname": $("#adminManage_add_logname").val()
+        };
+        $.ajax({
+            type: "POST",
+            url: "${pageContext.request.contextPath}/txCtrl?txcode=adminManageAdd",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            timeout: 20000,
+            dataType: "json",
+            error: function (msg) {
+                $.messager.alert('新增用户', '新增用户失败,该请求需要先登录!', 'error');
+            },
+            success: function (result) {
+                var data = result.data;
+                if (data.res) {
+                    $('#adminManage_dialog').dialog('close');
+                    $('#adminManage_grid').datagrid('reload');
+                }
+                $.messager.show({
+                    title: '信息',
+                    msg: data.msg,
+                    timeout: 4000,
+                    showType: 'slide'
+                });
+            }
+        });
+    }
+
+    /**
+     *打开更新用户页面窗口
+     */
+    function adminManage_edit_opendialog() {
+        var selectedRow = $('#adminManage_grid').datagrid("getSelected");
+        if (selectedRow == null) {
+            $.messager.show({
+                title: '信息',
+                msg: '请选择一行数据！',
+                timeout: 4000,
+                showType: 'slide'
+            });
+            return false;
+        }
+        var adminManage_dialog = $("#adminManage_dialog").dialog({
+            title: "编辑用户",
+            width: 800,
+            height: 820,
+            closed: false,
+            cache: false,
+            href: "adminManage-edit",
+            modal: true,
+            buttons: [{
+                text: '保存',
+                width: '50px',
+
+                handler: adminManage_update
+            }, {
+                text: '关闭',
+                width: '50px',
+                handler: function () {
+                    adminManage_dialog.dialog("close");
+                }
+            }]
+        });
+    }
+
+    /**
+     *更新用户保存
+     */
+    function adminManage_update() {
+        var options = $("#selected option");
+        var roleids = new Array();
+        options.each(function (i, o) {
+            roleids.push($(o).attr("value"));
+        });
+        var param = {
+            "account_id": $("#edit_account_id").val(),
+            "name": $("#edit_name").val(),
+            "orgid": $("#edit_orgid").combotree('getValue'),
+            "phone": $("#edit_phone").val(),
+            "tel": $("#edit_tel").val(),
+            "position": $("#edit_position").val(),
+            "address": $("#edit_address").val(),
+            "sex": $("#edit_sex").combobox("getValue"),
+            "email": $("#edit_email").val(),
+            "status": $("#edit_status").combobox("getValue"),
+            "roleids": roleids,
+            "logname": $("#edit_logname").val(),
+            "trunks": $("#edit_trunks").val()
+        };
+        if ($("#is_modify_password").is(':checked')) {//是否修改密码
+            if (!$("#adminManage_edit_form").form("validate")) {
+                return false;
+            }
+            param.password = $("#edit_password").val();
+        }
+        $.ajax({
+            type: "POST",
+            url: "${pageContext.request.contextPath}/txCtrl?txcode=adminManageUpdate",
+            data: JSON.stringify(param),
+            contentType: "application/json; charset=utf-8",
+            timeout: 20000,
+            dataType: "json",
+            error: function (msg) {
+                if (msg.responseJSON != undefined) {
+                    var status = msg.responseJSON.tips.message;
+                    if (status == "该交易需要先登录") {
+                        alert("修改失败!");
+                    }
+                }
+            },
+            success: function (result) {
+                var data = result.data;
+                if (data.res) {
+                    $('#adminManage_dialog').dialog('close');
+                    $('#adminManage_grid').datagrid('reload');
+                }
+                $.messager.show({
+                    title: '信息',
+                    msg: data.msg,
+                    timeout: 4000,
+                    showType: 'slide'
+                });
+            }
+        });
+    }
+
+    $(function () {
+        $("#admin-list-reset-button").click(function () {
+            $("#admin-data-search-form").form('clear');
+        });
+
+        $("#admin-list-search-button").click(function () {
+            $('#adminManage_grid').datagrid('load', {
+                'name': $('#search_name').val(),
+                'account_id': $('#search_account_id').val(),
+                'status': $('#search_status').combobox('getValue'),
+                'phone': $('#search_phone').val()
+            });
+        });
+    });
+</script>
+<style>
+    .search-lr {
+        width: 100px
+    }
+
+    .search-title {
+        width: 100px;
+        text-align: right;
+    }
+
+    .search-content {
+        text-align: left;
+    }
+</style>
+<form id="admin-data-search-form">
+    <table style="width:100%;padding-top: 20px">
+        <tr>
+            <td class="search-lr"></td>
+            <td class="search-title">姓名:</td>
+            <td class="search-content">
+                <input class="easyui-textbox" name="name" id="search_name" style="width:300px;">
+            </td>
+            <td class="search-title">登录账号:</td>
+            <td class="search-content">
+                <input class="easyui-textbox" name="account_id" id="search_account_id" style="width:300px;"></td>
+            <td class="search-lr"></td>
+        </tr>
+        <tr>
+            <td class="search-lr"></td>
+            <td class="search-title">用户状态:</td>
+            <td class="search-content">
+                <select class="easyui-combobox" name="status" id="search_status" style="width:300px;"
+                        data-options="panelHeight:'auto'">
+                    <option value="">请选择</option>
+                    <option value="1">有效</option>
+                    <option value="0">无效</option>
+                    <option value="2">异常</option>
+                </select>
+            </td>
+            <td class="search-title">电话号码:</td>
+            <td class="search-content">
+                <input class="easyui-textbox" name="phone" id="search_phone" style="width:300px;">
+            </td>
+            <td class="search-lr"></td>
+        </tr>
+        <tr>
+            <td colspan="6" style="text-align: center;height:70px">
+                <a class="easyui-linkbutton" iconCls="icon-reload" id="admin-list-reset-button"
+                   style="width:80px">重置</a>
+                <a class="easyui-linkbutton" iconCls="icon-search" id="admin-list-search-button"
+                   style="width:80px">查询</a>
+            </td>
+        </tr>
+    </table>
+</form>
+<table id="adminManage_grid"></table>

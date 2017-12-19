@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+	  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+	<meta charset="utf-8"></meta>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"></meta>
+	<title>e代付管理平台 </title>
+	<link rel="stylesheet" href="/webjars/github-com-novaeye-jquery-easyui-bower/1.5.0.1/themes/bootstrap/easyui.css"></link>
+	<link rel="stylesheet" href="/webjars/github-com-novaeye-jquery-easyui-bower/1.5.0.1/themes/icon.css"></link>
+	<script type="text/javascript" src="/webjars/github-com-novaeye-jquery-easyui-bower/1.5.0.1/jquery.min.js"></script>
+	<script type="text/javascript" src="/webjars/github-com-novaeye-jquery-easyui-bower/1.5.0.1/jquery.easyui.min.js"></script>
+	<script type="text/javascript" src="/webjars/github-com-novaeye-jquery-easyui-bower/1.5.0.1/locale/easyui-lang-zh_CN.js"></script>
+	<script type="text/javascript" src="/js/home.js"></script>
+	<style>
+		body {
+			font-size: 14px;
+		}
+		.img-circle {
+			border-radius: 50%;
+			width: 90px;
+		}
+
+		#menu ul {
+			list-style: outside none none;
+			padding-left: 0px;
+		}
+
+		#menu ul li {
+			padding-left: 0px;
+			height: 38px;
+			margin-top: -13px;
+		}
+		#menu ul span {
+			text-decoration: none;
+			background: #CDCDCD none repeat scroll 0 0;
+			display: block;
+			font-weight: 500;
+			height: 25px;
+			margin-top: 11px;
+			padding-left: 10px;
+			padding-top: 10px;
+		}
+	</style>
+	<script type="text/javascript">
+        $(function() {
+            indexInit();
+            $("#loginout").click(function(){
+                window.location.href = baseUrl+"/logout";
+            });
+        });
+	</script>
+</head>
+<body class="easyui-layout">
+<!-- 左侧导航 -->
+<div data-options="region:'west',split:true" style="width:180px;">
+	<div class="easyui-panel" data-options="fit:true,border:false">
+		<div class="easyui-layout" data-options="fit:true,border:false">
+			<div data-options="region:'north',border:false" style="height:140px;">
+				<div style=" text-align: center;height:100px;">
+					<div style="height:20px;"></div>
+					<span>
+						<img alt="image" class="img-circle" src="/images/fmd.png"></img>
+					</span>
+					<div style="text-align: center;margin-top:auto;" border="true">
+						<a href="#" class="easyui-menubutton" menu="#home_menubutton" style="width: 120px">
+							<span sec:authorize="isAuthenticated()">
+								<span sec:authentication="principal.name"></span>
+            				</span>
+						</a>
+					</div>
+					<div id="home_menubutton">
+						<!--<div>
+							<span>修改主题</span>
+							<div style="width:100px;">
+								<div onclick="javascript:changeTheme('ui-cupertino')">default</div>
+								<div onclick="javascript:changeTheme('gray')">gray</div>
+								<div onclick="javascript:changeTheme('metro-blue')">metro-blue</div>
+								<div onclick="javascript:changeTheme('metro-gray')">metro-gray</div>
+								<div onclick="javascript:changeTheme('metro-green')">metro-green</div>
+								<div onclick="javascript:changeTheme('metro-orange')">metro-orange</div>
+								<div onclick="javascript:changeTheme('metro-red')">metro-red</div>
+								<div onclick="javascript:changeTheme('ui-sunny')">ui-sunny</div>
+								<div onclick="javascript:changeTheme('default')">ui-cupertino</div>
+								<div onclick="javascript:changeTheme('ui-pepper-grinder')">ui-pepper-grinder</div>
+							</div>
+						</div>-->
+						<div id="update_password">修改密码</div>
+						<div id="loginout">退出</div>
+					</div>
+				</div>
+			</div>
+			<div data-options="region:'center',title:' ',fit:false,border:false">
+				<div class="easyui-accordion" data-options="fit:true" border="false" id="menu">
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- 页脚信息 -->
+<div data-options="region:'south',border:false" style="height:20px; background:#F3F3F3; padding:2px; vertical-align:middle;">
+	<span id="sysVersion">系统版本：e代付3.0</span> <span id="nowTime"></span>
+</div>
+<!-- 内容tabs -->
+<div id="center" data-options="region:'center'">
+	<div id="tabs" class="easyui-tabs" style="height: 100%" data-options="fit:true">
+		<div title="首页" style="padding:5px;display:block;">
+			<div id="dd" class="easyui-draggable">
+				<div id="p" class="easyui-panel" title="日历" style="width:300px;height:300px;" data-options="collapsible:true">
+					<div class="easyui-calendar" style="width:298px;height:260px;" data-options="border:false,weeks : ['日', '一', '二', '三', '四', '五', '六'],
+								months : ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月']"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- 用于弹出框 -->
+<div id="update_password_dialog">
+	<form id="update_password_form">
+		<table style="width:100%;">
+			<tr>
+				<td style="height:50px"></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td style="width:40px"></td>
+				<td align="right" >当前密码：</td>
+				<td><input class="easyui-validatebox" type="password" id="password" data-options="required:true" style="width:300px;height:30px"></input></td>
+				<td style="width:40px"></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td align="right">新密码：</td>
+				<td><input class="easyui-validatebox" type="password" data-options="required:true" id="newpassword" style="width:300px;height:30px"></input></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td align="right" style="width:100px;" nowrap="nowrap">重新输入密码：</td>
+				<td><input class="easyui-validatebox" type="password" data-options="required:true" validType="same['newpassword']" id="renewpassword" style="width:300px;height:30px"></input></td>
+				<td></td>
+			</tr>
+		</table>
+	</form>
+</div>
+</body>
+</html>

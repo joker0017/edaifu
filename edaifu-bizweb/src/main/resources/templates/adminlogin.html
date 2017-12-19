@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"></meta>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"></meta>
+	<title>e代付管理平台 </title>
+	<link rel='stylesheet' href='/webjars/bootstrap/3.3.7/css/bootstrap.min.css'></link>
+	<script type="text/javascript" src="/webjars/jquery-easyui/1.5.21/js/jquery.min.js"></script>
+	<script type="text/javascript" src="/webjars/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<link rel='stylesheet' href='/css/style.css'></link>
+</head>
+<body class="gray-bg">
+	<div class="middle-box text-center loginscreen  animated fadeInDown s-skin-0">
+		<div>
+			<div style="height:270px">
+				<h1 class="logo-name">E 代 付</h1>
+			</div>
+			<h3>e代付管理平台</h3>
+			<form class="m-t" id="login" name="login" action="/authentication/form" method="post">
+				<div class="form-group">
+					<input type="text" class="form-control" id="account_id" name="username" placeholder="用户名" required="" value="cfadmin"/>
+				</div>
+				<div class="form-group">
+					<input type="password" id="password" name="password" class="form-control" placeholder="密码" required="" value="chaofuadmin"/>
+				</div>
+				<button type="submit" class="btn btn-primary block full-width m-b">登录</button>
+			</form>
+		</div>
+	</div>
+</body>
+</html>
